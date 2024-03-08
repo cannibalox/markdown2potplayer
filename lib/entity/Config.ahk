@@ -56,7 +56,7 @@ Class Config{
         set => UpdateOrIntert("url_protocol",Value)
     }
     
-    ; ============回链快捷键相关================
+    ; ============Back link shortcut keys related================
     HotkeyBacklink{
         get => GetKey("hotkey_backlink")
         set => UpdateOrIntert("hotkey_backlink",Value)
@@ -78,7 +78,7 @@ Class Config{
         get => GetKey("hotkey_ab_circulation")
         set => UpdateOrIntert("hotkey_ab_circulation",Value)
     }
-    ; ============映射Potplayer快捷键相关================
+    ; ============Mapping potplayer shortcut keys related================
     HotkeyPreviousFrame{
         get => GetKey("hotkey_previous_frame")
         set => UpdateOrIntert("hotkey_previous_frame",Value)

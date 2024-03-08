@@ -45,7 +45,7 @@ InitServer() {
                 If !(buf := sock.Recv()).size
                     return
 
-                ; 返回html
+                ; returnhtml
                 html_body := '<h1>open potplayer...</h1>'
                 httpResponse := "HTTP/1.1 200 0K`r`n"
                     . "Content-Type: text/html; charset=UTF-8`r`n"
@@ -57,7 +57,7 @@ InitServer() {
                 sock.Send(strbuf)
                 sock.ConnectFinish()
 
-                ; 得到回链
+                ; Get backlink
                 request := strget(buf, "UTF-8")
                 RegExMatch(request, "GET /(.+?) HTTP/1.1", &match)
                 if (match == "") {
@@ -68,12 +68,12 @@ InitServer() {
                     return
                 }
 
-                ; 打开potplayer
+                ; Openpotplayer
                 cmd := A_ScriptDir "\lib\note2potplayer\note2potplayer.exe " backlink
                 Run(cmd,,"Hide",,)
                 Send "^w"
 
-                ; 我真无语，Run命令会阻塞socket库，且autohotkey没有多线程，只能用这种方法，让socket库继续运行
+                ; silently，RunThe command will block socket Library，autohotkey ，Only this method can be used，letsocket 
                 Run(A_ScriptDir "\markdown2potplayer.exe")
                 ExitApp
             }
@@ -97,13 +97,13 @@ RegisterHotKey(){
 
 RefreshHotkey(old_hotkey,new_hotkey,callback){
     try{
-        ; 情况1：用户删除热键
+        ; Scenario 1: User deletes hotkey
         if new_hotkey == ""{
             if(old_hotkey != ""){
                 Hotkey old_hotkey " Up", "off"
             }
         } else{
-            ; 情况2：用户重设热键
+            ; Scenario 2: User resets hotkeys
             if(old_hotkey != ""){
                 Hotkey old_hotkey " Up", "off"
             }
@@ -112,8 +112,8 @@ RefreshHotkey(old_hotkey,new_hotkey,callback){
         }
     }
     catch Error as err{
-        ; 热键设置无效
-        ; 防止无效的快捷键产生报错，中断程序
+        ; Hotkey setting is invalid
+        ; Prevent invalid shortcut keys from generating errors and interrupting the program
         Exit
     }
 }
@@ -131,7 +131,7 @@ CheckCurrentProgram(*){
     return false
 }
 
-; 【主逻辑】将Potplayer的播放链接粘贴到Obsidian中
+; 【main logic】Potplayer Paste the play link into Obsidian
 Potplayer2Obsidian(*){
     ReleaseCommonUseKeyboard()
 
@@ -155,7 +155,7 @@ RenderMarkdownTemplate(markdown_template, media_path, media_time){
     return markdown_template
 }
 
-; 【主逻辑】粘贴图像
+; [Main logic] Paste image
 Potplayer2ObsidianImage(*){
     ReleaseCommonUseKeyboard()
 
@@ -180,18 +180,18 @@ GetMediaTime(){
     return time
 }
 PressDownHotkey(operate_potplayer){
-    ; 先让剪贴板为空, 这样可以使用 ClipWait 检测文本什么时候被复制到剪贴板中.
+    ;Make the clipboard empty first so you can use ClipWait . Detect when text is copied to the clipboard.
     A_Clipboard := ""
-    ; 调用函数会丢失this，将对象传入，以便不会丢失this => https://wyagd001.github.io/v2/docs/Objects.htm#Custom_Classes_method
+    ; Calling the function will lose this, pass the object in so that it will not be los tthis => https://wyagd001.github.io/v2/docs/Objects.htm#Custom_Classes_method
     operate_potplayer(potplayer_control)
     ClipWait 1,0
     result := A_Clipboard
-    ; MyLog "剪切板的值是：" . result
+    ; MyLog "The value of the clipboard is：" . result
 
-    ; 解决：一旦potplayer左上角出现提示，快捷键不生效的问题
+    ; Solution: Once potplayer A prompt appears in the upper left corner and the shortcut keys do not work.
     if (result == "") {
         SafeRecursion()
-        ; 无限重试！
+        ; Infinite retries!
         result := PressDownHotkey(operate_potplayer)
     }
     running_count := 0
@@ -206,13 +206,13 @@ PauseMedia(){
 
 RenderTitle(markdown_template, markdown_title, media_path, media_time){
     markdown_link_data := GenerateMarkdownLinkData(markdown_title, media_path, media_time)
-    ; 生成word链接
+    ; Generate word link
     if(IsWordProgram()){
         word_link := "<a href='http://127.0.0.1:33660/" markdown_link_data.link "'>"  markdown_link_data.title "</a>"
         result := StrReplace(markdown_template, "{title}",word_link)
         result := StrReplace(result, "`n","<br/>")
     }else{
-        ; 生成MarkDown链接
+        ; Generate mark down link
         markdown_link := GenerateMarkdownLink(markdown_link_data.title, markdown_link_data.link)
         result := StrReplace(markdown_template, "{title}",markdown_link)
     }
@@ -231,19 +231,19 @@ IsNotionProgram(){
     || target_program == "firefox.exe"
 }
 
-; // [用户想要的标题格式](mk-potplayer://open?path=1&aaa=123&time=456)
+; // [Title format desired by user](mk-potplayer://open?path=1&aaa=123&time=456)
 GenerateMarkdownLinkData(markdown_title, media_path, media_time){
-    ; B站的视频
+    ; Video of station B
     if (InStr(media_path,"https://www.bilibili.com/video/")){
-        ; 正常播放的情况
+        ; Normal playback situation
         name := StrReplace(GetPotplayerTitle(app_config.PotplayerProcessName), " - PotPlayer", "")
         
-        ; 视频没有播放，已经停止的情况，不是暂停是停止
+        ; When the video is not playing and has stopped, it is not paused but stopped.
         if name == "PotPlayer"{
             name := GetFileNameInPath(media_path)
         }
     } else{
-        ; 本地视频
+        ;local video
         name := GetFileNameInPath(media_path)
     }
     markdown_title := StrReplace(markdown_title, "{name}",name)
@@ -300,17 +300,17 @@ RemoveSuffix(name){
     return result
 }
 
-; 路径地址处理
+; Path address processing
 ProcessUrl(media_path){
-    ; 进行Url编码
+    ; perform url encoding
     if (app_config.MarkdownPathIsEncode != "0"){
         media_path := UrlEncode(media_path)
     }else{
-        ; 全系urlencode的bug：如果路径中存在"\["会让，在【ob的预览模式】下(回链会被ob自动urlencode)，"\"离奇消失变为,"["；例如：G:\BaiduSyncdisk\123\[456] 在bug下变为：G:\BaiduSyncdisk\123[456] <= 丢失了"\"
-        ; 所以先将"\["替换为"%5C["（\的urlencode编码%5C）。变为：G:\BaiduSyncdisk\123%5C[456]
+        ; Bug in all urlencode systems: If "\[" exists in the path, in [ob's preview mode] (return links will be automatically urlencoded by ob), "\" will disappear strangely and become, "["; for example: G :\BaiduSyncdisk\123\[456] changes to: G:\BaiduSyncdisk\123[456] under bugs <= "\" is missing
+        ; So first replace "\[" with "%5 c[" (\'s urlencode encoding %5 c). become：G:\BaiduSyncdisk\123%5C[456]
         media_path := StrReplace(media_path, "\[", "%5C[")
         media_path := StrReplace(media_path, "\!", "%5C!")
-        ; 但是 obidian中的potplayer回链路径有空格，在obsidian的预览模式【无法渲染】，所以将空格进行Url编码
+        ; However, there are spaces in the potplayer link path in obidian. In the preview mode of obidian, [cannot be rendered], so the spaces are URL-encoded.
         media_path := StrReplace(media_path, " ", "%20")
     }
 
@@ -327,7 +327,7 @@ SendText2NoteApp(text){
     Send "{LCtrl down}"
     Send "{v}"
     Send "{LCtrl up}"
-    ; 粘贴文字需要等待一下obsidian有延迟，不然会出现粘贴的文字【消失】
+    ; You need to wait for a while when pasting text. Obsidian has a delay, otherwise the pasted text will appear [disappear].
     Sleep 300
 }
 SendText2wordApp(text){
@@ -337,7 +337,7 @@ SendText2wordApp(text){
 }
 
 SaveImage(){
-    Assert(potplayer_control.GetPlayStatus() == "Stopped" , "视频尚未播放，无法截图！")
+    Assert(potplayer_control.GetPlayStatus() == "Stopped" , "The video has not been played yet and screenshots cannot be taken.！")
 
     A_Clipboard := ""
     potplayer_control.SaveImageToClipboard()
@@ -356,11 +356,11 @@ SendImage2NoteApp(image){
     Send "{LCtrl down}"
     Send "{v}"
     Send "{LCtrl up}"
-    ; 给Obsidian图片插件处理图片的时间
+    ; Give the obsidian picture plug-in time to process the picture
     Sleep 1000
 }
 
-; 【A-B片段、循环】
+; 【A b fragment, loop]
 PressHotkeyCount := 0
 Potplayer2ObsidianFragment(HotkeyName){
     global
@@ -369,34 +369,34 @@ Potplayer2ObsidianFragment(HotkeyName){
     PressHotkeyCount += 1
 
     if (PressHotkeyCount == 1){
-        ; 第一次按下快捷键，记录时间
+        ; The first time you press the shortcut key, record the time
         fragment_start_time := GetMediaTime()
-        ; 通知用户
-        ToolTip("已经记录起点的时间！请再次按下快捷键，记录终点的时间。按Esc取消")
+        ;Notify user
+        ToolTip("The starting time has been recorded！Please press the shortcut key again，Record the end time. Press esc to cancel")
         SetTimer () => ToolTip(), -2000
         
         HotIf CheckCurrentProgram
         Hotkey("Escape Up",cancel,"On")
         cancel(*){
-            ; 重置计数器
+            ; reset counter
             PressHotkeyCount := 0
             Hotkey("Escape Up", "off")
         }
     } else if (PressHotkeyCount == 2){
-        Assert(fragment_start_time == "", "未设置起点时间，无法生成该片段的链接！")
-        ; 重置计数器
+        Assert(fragment_start_time == "", "The starting time is not set and the link to this segment cannot be generated.！")
+        ;reset counter
         PressHotkeyCount := 0
         Hotkey("Escape Up", "off")
 
-        ; 第二次按下快捷键，记录时间
+        ; Press the shortcut key a second time to record the time
         fragment_end_time := GetMediaTime()
 
-        ; 如果终点时间小于起点时间，就交换两个时间
+        ; If the end time is less than the start time, swap the two times.
         if (TimeToSeconds(fragment_end_time) < TimeToSeconds(fragment_start_time)){
             temp := fragment_start_time
             fragment_start_time := fragment_end_time
             fragment_end_time := temp
-            ; 释放内存
+            ;free memory
             temp := ""
         }
 
@@ -410,11 +410,11 @@ Potplayer2ObsidianFragment(HotkeyName){
             fragment_time := fragment_start_time "∞" fragment_end_time
         }
         
-        ; 生成片段链接
+        ; Generate fragment link
         markdown_link := RenderMarkdownTemplate(app_config.MarkdownTemplate, media_path, fragment_time)
         PauseMedia()
 
-        ; 发送到笔记软件
+        ; Send to note-taking software
         if(IsWordProgram()){
             SendText2wordApp(markdown_link)
         }else{

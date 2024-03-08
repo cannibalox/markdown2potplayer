@@ -17,35 +17,34 @@ InitOpenWindowParameter(potplayer_path){
     return "/new"
   }
 }
-
-; 2. 主逻辑
+; 2. Main logic
 AppMain()
 AppMain(){
   CallbackPotplayer()
 }
 
-; 【主逻辑】Potplayer的回调函数（回链）
+; [Main logic] Potplayer's callback function (back link)
 CallbackPotplayer(){
   url := ReceivParameter()
   if url{
     ParseUrl(url)
   }else{
-    MsgBox "至少传递1个参数"
+    MsgBox "Pass at least 1 parameter"
   }
   ExitApp
 }
 
 ReceivParameter(){
-  ; 获取命令行参数的数量
+  ; Get the number of command line parameters
   paramCount := A_Args.Length
 
-  ; 如果没有参数，显示提示信息
+  ; If there are no parameters, display a prompt message
   if (paramCount = 0) {
       return false
   }
 
   params := ""
-  ; 循环遍历参数并显示在控制台
+  ; Loop through the parameters and display them on the console
   for n, param in A_Args{
     params .= param " "
   }
@@ -59,11 +58,11 @@ ParseUrl(url){
   index_of := InStr(url, "?")
   parameters_of_url := SubStr(url, index_of + 1)
 
-  ; 1. 解析键值对
+  ; 1. Parse key-value pairs
   parameters := StrSplit(parameters_of_url, "&")
   parameters_map := Map()
 
-  ; 1.1 普通解析
+  ; 1.1 Ordinary analysis
   for index, pair in parameters {
     index_of := InStr(pair, "=")
     if (index_of > 0) {
@@ -73,24 +72,24 @@ ParseUrl(url){
     }
   }
   
-  ; 1.2 对path参数特殊处理，因为路径中可能是网址
+  ; 1.2 Special treatment for the path parameter, because the path may be a URL
   path := SubStr(parameters_of_url,1, InStr(parameters_of_url, "&time=") -1)
   path := StrReplace(path, "path=", "")
   parameters_map["path"] := path
 
-  ; 2. 跳转Potplayer
+  ; 2. Jump to Potplayer
   ; D:\PotPlayer64\PotPlayerMini64.exe "D:\123.mp4" /seek=00:01:53.824 /new
   media_path := parameters_map["path"]
   media_time := parameters_map["time"]
 
-  ; 情况0：是同一个视频进行跳转，之前可能设置了AB循环，所以此处先取消A-B循环
+ ; Case 0: The same video is being jumped. The AB loop may have been set before, so cancel the A-B loop here first.
   if(IsPotplayerRunning(potplayer_path)){
     if(IsSameVideo(media_path)){
       potplayer.CancelTheABCycle()
     }
   }
 
-  ; 情况1：单个时间戳 00:01:53
+  ; Case 1: Single timestamp 00:01:53
   if(IsSingleTimestamp(media_time)){
     if(IsPotplayerRunning(potplayer_path)){
       if(IsSameVideo(media_path)){
@@ -100,23 +99,23 @@ ParseUrl(url){
       }
     }
     OpenPotplayerAndJumpToTimestamp(media_path, media_time)
-    ; 情况2：时间戳片段 00:01:53-00:02:53
+  ; Case 2: timestamp fragment 00:01:53-00:02:53
   } else if(IsAbFragment(media_time)){
     if(GetKeyName("loop_ab_fragment")){
       JumpToAbCirculation(media_path, media_time)
     }else{
       JumpToAbFragment(media_path, media_time)
     }
-    ; 情况3：时间戳循环 00:01:53∞00:02:53
+; Case 3: timestamp loop 00:01:53∞00:02:53
   } else if(IsAbCirculation(media_time)){
     JumpToAbCirculation(media_path, media_time)
   }
   ExitApp()
 }
 
-; 解析时间片段字符串
+; Parse time segment string
 ParseTimeFragmentString(media_time){
-  ; 1. 解析时间戳
+  ; 1. Parse timestamp
   time_separator := ["∞", "-"]
 
   index_of := ""
@@ -126,7 +125,7 @@ ParseTimeFragmentString(media_time){
       break
     }
   }
-  Assert(index_of == "", "时间戳格式错误")
+  Assert(index_of == "", "Timestamp format error")
 
   time := {}
   time.start := SubStr(media_time, 1, index_of - 1)
@@ -134,9 +133,9 @@ ParseTimeFragmentString(media_time){
   return time
 }
 
-; 判断当前播放的视频，是否是跳转的视频
+; Determine whether the currently playing video is a jump video
 IsSameVideo(media_path){
-    ; 判断网络视频
+    ; Judge online videos
     if(InStr(media_path,"http")){
       potplayer_media_path := GetPotplayerMediaPath()
       if(InStr(media_path,potplayer_media_path)){
@@ -152,29 +151,28 @@ IsSameVideo(media_path){
       }
     }
     
-    ; 判断本地视频
+   ; Determine local video
     potplayer_title := WinGetTitle("ahk_id " potplayer.GetPotplayerHwnd())
     if (InStr(potplayer_title, GetNameForPath(media_path))) {
       return true
     }
 }
 
-; 字符串中不包含"-、∞"，则为单个时间戳
+; If the string does not contain "-, ∞", it is a single timestamp.
 IsSingleTimestamp(media_time){
   if(InStr(media_time, "-") > 0 || InStr(media_time, "∞") > 0)
     return false
   else
     return true
 }
-
-; 使用时间戳跳转
+; Jump using timestamp
 OpenPotplayerAndJumpToTimestamp(media_path, media_time){
   run_command := potplayer_path . " `"" . media_path . "`" /seek=" . media_time . " " . open_window_parameter
   try{
     Run run_command
   } catch Error as err
     if err.Extra{
-      MsgBox "错误：" err.Extra
+      MsgBox "mistake：" err.Extra
       MsgBox run_command
     } else {
       throw err
@@ -188,7 +186,7 @@ IsAbFragment(media_time){
     return false
 }
 JumpToAbFragment(media_path, media_time){
-  ; 1. 解析时间戳
+  ; 1. parse timestamp
   time := ParseTimeFragmentString(media_time)
 
   call_data := {}
@@ -196,7 +194,7 @@ JumpToAbFragment(media_path, media_time){
   call_data.media_path := media_path
   call_data.time := time
   
-  ; 2. 跳转
+  ; 2. Jump
   CallPotplayer(call_data)
   Sleep 500
 
@@ -208,20 +206,20 @@ JumpToAbFragment(media_path, media_time){
     Hotkey "Esc", "off"
   }
 
-  ; 3. 检查结束时间
+; 3. Check end time
   while (flag_ab_fragment) {
-    ; 异常情况：用户关闭Potplayer
+    ; Exception: User closes Potplayer
     if (!IsPotplayerRunning(potplayer_path)) {
       break
-      ; 异常情况：用户停止播放视频
+      ; Exception: user stops playing the video
     } else if (potplayer.GetPlayStatus() != "Running") {
       break
-      ; 异常情况：不是同一个视频 --> 在播放B站视频时，可以加载视频列表，这样用户就会切换视频，此时就要结束循环
+      ; Abnormal situation: Not the same video --> When playing the video of station B, you can load the video list, so that the user will switch videos, and the loop will end at this time
     } else if (!IsSameVideo(media_path)) {
       break
     }
 
-    ; 正常情况：当前播放时间超过了结束时间、用户手动调整时间，超过了结束时间
+; Normal situation: the current playback time exceeds the end time, the user manually adjusts the time, and exceeds the end time.
     current_time := potplayer.GetCurrentSecondsTime()
     if (current_time >= TimeToSeconds(time.end)) {
       potplayer.PlayPause()
@@ -246,13 +244,13 @@ JumpToAbCirculation(media_path, media_time){
   call_data.media_path := media_path
   call_data.time := time
   
-  ; 2. 跳转
+; 2. Jump
   CallPotplayer(call_data)
 
-  ; 3. 设置A-B循环起点
+  ; 3. Set the starting point of A-B loop
   potplayer.SetStartPointOfTheABCycle()
 
-  ; 4. 设置A-B循环终点
+  ; 4. Set the end point of the A-B cycle
   potplayer.SetCurrentSecondsTime(TimeToSeconds(time.end))
   potplayer.SetEndPointOfTheABCycle()
 }
@@ -263,7 +261,7 @@ CallPotplayer(call_data){
       potplayer.SetCurrentSecondsTime(TimeToSeconds(call_data.time.start))
       potplayer.Play()
     }else{
-      ; 播放指定视频
+ ; Play the specified video
       PlayVideo(call_data.media_path, call_data.time.start)
     }
   }else{
@@ -279,10 +277,10 @@ WaitForPotplayerToFinishLoadingTheVideo(video_name){
   WinWait("ahk_exe " GetNameForPath(potplayer_path))
 
   hwnd := potplayer.GetPotplayerHwnd()
-  ; 判断当前potplayer播放器的状态
+ ; Determine the status of the current potplayer player
   potplayer_is_open := IsPotplayerOpen(hwnd)
   if(potplayer_is_open){
-    ; 等待Potplayer加载视频，从上一个视频，跳转到下一个视频，窗口的命名会发生变化 => PotPlayer - 123.mp4 => Potplayer => PotPlayer - 456.mp4
+    ; Wait for Potplayer to load the video, jump from the previous video to the next video, the name of the window will change => PotPlayer -123.mp4 => Potplayer => PotPlayer -456.mp4
     while (true) {
       if(WinGetTitle("ahk_id " hwnd) == "PotPlayer"){
         break
@@ -290,13 +288,13 @@ WaitForPotplayerToFinishLoadingTheVideo(video_name){
       Sleep 100
     }
     
-    ; 跳转到下一个视频，等待视频加载完成，检查播放器是否已经开始播放
-    ; 新开Potplayer、已开Potplayer跳转到下一个视频，等待视频加载完成，检查播放器是否已经开始播放
+    ; Jump to the next video, wait for the video to load, and check whether the player has started playing
+    ; Newly opened Potplayer, already opened Potplayer jumps to the next video, waits for the video to be loaded, and checks whether the player has started playing.
     while (potplayer.GetPlayStatus() != "Running") {
       Sleep 1000
     }
   }else{
-    ; 新开Potplayer跳转到下一个视频，等待视频加载完成，检查播放器是否已经开始播放
+   ; Open Potplayer to jump to the next video, wait for the video to load, and check whether the player has started playing.
     while (true) {
       if(InStr(WinGetTitle("ahk_id " hwnd),video_name)
         && (potplayer.GetPlayStatus() == "Running")){

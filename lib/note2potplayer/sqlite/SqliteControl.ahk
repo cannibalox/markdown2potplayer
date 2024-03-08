@@ -1,17 +1,17 @@
 #Requires AutoHotkey v2.0.0
 #Include "Class_SQLiteDB.ahk"
 
-; 数据库文件路径
+; Database file path
 db_file_path := SubStr(A_ScriptDir, 1,InStr(A_ScriptDir,"\lib",,1) -1 ) "\config.db"
 table_name := "config"
 
 OpenLocalDB(){
-  ; 创建 SQLiteDB 实例
+  ;Create SQLiteDB instance
   DB := SQLiteDB()
   
-  ; 打开或创建数据库
+  ; Open or create database
   if !DB.OpenDB(db_file_path) {
-    MsgBox("无法打开或创建数据库: " db_file_path "`n错误信息: " DB.ErrorMsg)
+    MsgBox("Unable to open or create database: " db_file_path "`nError message: " DB.ErrorMsg)
     ExitApp
   }
   return DB
@@ -20,21 +20,21 @@ OpenLocalDB(){
 GetKeyName(key){
   DB := OpenLocalDB()
 
-  ; 读取 key 为 'app_name' 的值
+  ; Read the value with key 'app_name'
   SQL_SelectValue := "SELECT value FROM " table_name " WHERE key = '" key "';"
   Result := ""
   if !DB.GetTable(SQL_SelectValue, &Result) {
-      MsgBox("无法读取配置项 '" key "'`n错误信息: " . DB.ErrorMsg)
+      MsgBox("Unable to read configuration item '" key "'`nError message: " . DB.ErrorMsg)
       DB.CloseDB()
       ExitApp
   }
 
-  ; 显示结果
+ ; Show results
   if Result.RowCount > 0 {
-      ; MsgBox("配置项 '" key "' 的值为: " . Result.Rows[1][1]) ; 获取第一行第一列的值
+      ; MsgBox("The value of configuration item '" key "' is: " . Result.Rows[1][1]) ; Get the value of the first row and first column
       return Result.Rows[1][1]
   } else {
-      ; MsgBox("配置项 '" key "' 不存在。")
+      ; MsgBox("Configuration item '" key "' does not exist.")
       return false
   }
 

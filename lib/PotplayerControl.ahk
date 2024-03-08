@@ -99,11 +99,11 @@ class PotplayerControl {
         this.PostCommand(this.COMMAND_TYPE,10246,0)
     }
 
-    ; 时间
+; time
     GetMediaTimeMilliseconds(){
         return this.SendCommand(this.REQUEST_TYPE,20484,0)
     }
-    ; 受【选项-播放-时间跨度-如果存在关键帧数据则以关键帧为移动单位】的potplayer后处理影响不够精准，关掉此选项则非常精准
+    ; Affected by the potplayer post-processing of [Options-Playback-Time Span-If keyframe data exists, use keyframes as movement units], it is not accurate enough. Turning this option off will be very accurate.
     SetMediaTimeMilliseconds(ms){
         this.PostCommand(this.REQUEST_TYPE,20485, ms)
     }
@@ -120,7 +120,7 @@ class PotplayerControl {
         this.SetMediaTimeMilliseconds(seconds*1000)
     }
 
-    ; A-B 循环
+; A-B loop
     SetStartPointOfTheABCycle(){
         this.PostCommand(this.COMMAND_TYPE,10249,0)
     }
@@ -128,14 +128,14 @@ class PotplayerControl {
         this.PostCommand(this.COMMAND_TYPE,10250,0)
     }
     CancelTheABCycle(){
-        ; 解除区段循环：起点
+        ; Unloop section: starting point
         this.PostCommand(this.COMMAND_TYPE,10251,0)
-        ; 解除区段循环：终点
+        ; Unlock section loop: end point
         this.PostCommand(this.COMMAND_TYPE,10252,0)
     }
 }
 
-; 示例
+; Example
 ; potplayer := PotplayerControl("PotplayerMini64.exe")
 
 ; potplayer.SpeedUp()

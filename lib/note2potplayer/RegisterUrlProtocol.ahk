@@ -1,6 +1,6 @@
 #Requires AutoHotkey v2.0
 
-; 注册协议
+; Registration Agreement
 RegisterUrlProtocol(url_protocol){
     protocol_name := GetUrlProtocolName(url_protocol)
     RegistrationUrlProtocol(protocol_name)

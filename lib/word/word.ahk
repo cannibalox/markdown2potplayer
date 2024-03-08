@@ -21,23 +21,23 @@ AppMain(){
     Send "{v}"
     Send "{LCtrl up}"
 
-    ; 复制或转换字符串.
+ ; Copy or convert a string.
     StrBuf(str, encoding) {
-        ; 计算所需的大小并分配缓冲.
+        ; Calculate required size and allocate buffer.
         buf := Buffer(StrPut(str, encoding))
-        ; 复制或转换字符串.
+        ; Copy or convert a string.
         StrPut(str, buf, encoding)
         return buf
     }
 }
 ReceivParameter(){
-  ; 如果没有参数
+ ; if no parameters
   if (A_Args.Length = 0) {
       return false
   }
 
   params := ""
-  ; 循环遍历参数并显示在控制台
+  ; Loop through the parameters and display them on the console
   for n, param in A_Args{
     params .= param " "
   }

@@ -2,14 +2,14 @@
 
 log_toggle := false
 
-; 在路径中，获取程序的名称
+; In the path, get the name of the program
 GetNameForPath(program_path){
   SplitPath program_path, &name
   return name
 }
 
 SearchProgram(target_app_path) {
-  ; 程序正在运行
+  ; The program is running
   if (WinExist("ahk_exe " GetNameForPath(target_app_path))) {
       return true
   } else {
@@ -35,7 +35,7 @@ ActivateProgram(process_name){
 
   if (WinExist("ahk_exe " process_name)) {
       WinActivate ("ahk_exe " process_name)
-      Sleep 300 ; 给程序切换窗口的时间
+      Sleep 300 ; Give the program time to switch windows
   } else {
       MsgBox process_name " is not running"
       Exit
@@ -49,9 +49,9 @@ IsPotplayerRunning(media_player_path){
       return false
 }
 
-; 获取Potplayer的标题
-; 获取失败的原因：因为Potplayer的exe可能存在多个线程，而WinGetTitle其中一个线程的标题，结果可能为空字符串
-; 参考：https://stackoverflow.com/questions/54570212/why-is-my-call-to-wingettitle-returning-an-empty-string
+; Get the title of Potplayer
+; Reason for failure to obtain: Because Potplayer's exe may have multiple threads, and WinGetTitle's title of one of the threads, the result may be an empty string
+; Reference: https://stackoverflow.com/questions/54570212/why-is-my-call-to-wingettitle-returning-an-empty-string
 GetPotplayerTitle(potplayer_process_name){
   ids := WinGetList("ahk_exe " potplayer_process_name)
   for id in ids{
@@ -68,12 +68,12 @@ MyLog(message){
       MsgBox message
 }
 
-; 安全的递归
+; safe recursion
 global running_count := 0
 SafeRecursion(){
   global running_count
   running_count++
-  ToolTip("正在重试，第" running_count "次尝试...")
+  ToolTip("Retrying, " running_count "th attempt...")
   SetTimer () => ToolTip(), -1000
   if (running_count > 5) {
     running_count := 0
@@ -82,7 +82,7 @@ SafeRecursion(){
   }
 }
 
-; 等待释放指定按键
+; Wait for the specified key to be released
 ReleaseKeyboard(keyName){
   if GetKeyState(keyName){
       if KeyWait(keyName,"T2") == 0{

@@ -1,6 +1,6 @@
 #Requires AutoHotkey v2.0
 
-; 修改秒数并返回新的时间格式
+; Modify seconds and return new time format
 ReduceTime(originalTime, secondsToModify) {
   seconds := TimeToSeconds(originalTime)
 
@@ -22,7 +22,7 @@ GetMilliseconds(originalTime) {
   return ms
 }
 
-; 将时间字符串转换为秒
+; Convert time string to seconds
 TimeToSeconds(timeStr) {
   RegExMatch(timeStr, "^((?<hours>\d+):)?((?<minutes>[0-5][0-9]):)?(?<seconds>[0-5][0-9])(\.(?<ms>\d+))?$", &matches)
   h := matches.hours ? matches.hours : 0
@@ -30,7 +30,7 @@ TimeToSeconds(timeStr) {
   s := matches.seconds ? matches.seconds : 0
   ms := matches.seconds
 
-  ; 修正正则表达式的bug：当传入的数据是"16:34"，会出现h=16，m=0，s=34的情况
+; Fixed regular expression bug: when the incoming data is "16:34", h=16, m=0, s=34 will appear.
   if (CountCharOccurrences(timeStr, ":") = 1) {
     if (h > 0 && m = 0 && s >= 0) {
       m := h
@@ -42,7 +42,7 @@ TimeToSeconds(timeStr) {
   return result
 }
 
-; 查找字符串中`char`字符的总个数
+; Find the total number of `char` characters in a string
 CountCharOccurrences(string, char) {
   parts := StrSplit(string, char)
   if parts.Length > 1 {
@@ -51,7 +51,7 @@ CountCharOccurrences(string, char) {
   return parts.Length
 }
 
-; 将秒转换回原始格式
+; Convert seconds back to original format
 SecondsToTimeFormat(duration) {
   if (duration < 60){
     if (duration < 10){
@@ -74,7 +74,7 @@ SecondsToTimeFormat(duration) {
   }
 }
 
-; 修正秒数和分钟数的显示格式
+; Correct display format of seconds and minutes
 ModifyTimeFormat(&hours, &minutes, &seconds) {
   if (hours = 0){
     hours := "00"
@@ -95,7 +95,7 @@ ModifyTimeFormat(&hours, &minutes, &seconds) {
   }
 }
 
-; 示例
+; Example
 ; originalTime2 := "00:00:59"
 ; MsgBox TimeToSeconds(originalTime2)
 ; newTime2 := ReduceTime(originalTime2, 3)
